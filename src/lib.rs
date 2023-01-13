@@ -1,3 +1,5 @@
+#![warn(warnings, rust_2018_idioms, unreachable_code)]
+
 use std::sync::{
     mpsc::{channel, Sender},
     Arc, Mutex,
