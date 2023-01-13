@@ -59,10 +59,12 @@ mod tests {
         time::Duration,
     };
 
+    // a function to mock http calls delays
     fn sleep(n: u64) {
         thread::sleep(Duration::from_secs(n));
     }
 
+    // some functions mocking results from api calls or database calls
     fn get_users_from_db_1(users: Arc<Mutex<Vec<HashMap<&str, &str>>>>) {
         let mut user = HashMap::<&str, &str>::new();
         user.insert("name", "toto");
@@ -79,12 +81,15 @@ mod tests {
 
     #[test]
     fn it_works() {
+        // instanciating the pool with 5 threads
         let pool = ThreadPool::new(5);
 
+        // setting up an empty vec to collect users from databases
         let users = Arc::new(Mutex::new(Vec::<HashMap<&str, &str>>::new()));
         let users_clone_1 = users.clone();
         let users_clone_2 = users.clone();
 
+        // setting up a counter ready to be incremented
         let numref = Arc::new(AtomicU32::new(0));
         let ref_clone = numref.clone();
 
@@ -92,6 +97,7 @@ mod tests {
             ref_clone.fetch_add(1, Ordering::SeqCst);
         };
 
+        // executing 5 functions with different actions almost at the same time
         pool.exec(|| {
             sleep(1);
             println!("Hi after sleep");
@@ -106,6 +112,7 @@ mod tests {
 
         // here sleeping a bit to be sure every thread finished working  - not mandatory but usefull in the tests to get the logs
         sleep(3);
+        // expecting users length and counter value
         let res = users.lock().unwrap();
         assert_eq!(res.len(), 3);
         assert_eq!(numref.load(Ordering::SeqCst), 2);
