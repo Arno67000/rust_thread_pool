@@ -6,12 +6,12 @@ use std::sync::{
 };
 use std::thread;
 
-pub struct ThreadPool {
+pub struct Pool {
     _handles: Vec<std::thread::JoinHandle<()>>,
     sender: Sender<Box<dyn FnMut() + Send>>,
 }
 
-impl ThreadPool {
+impl Pool {
     pub fn new(num_threads: u8) -> Self {
         let (tx, rx) = channel::<Box<dyn FnMut() + Send>>();
         let rx = Arc::new(Mutex::new(rx));
@@ -84,7 +84,7 @@ mod tests {
     #[test]
     fn it_works() {
         // instanciating the pool with 5 threads
-        let pool = ThreadPool::new(5);
+        let pool = Pool::new(5);
 
         // setting up an empty vec to collect users from databases
         let users = Arc::new(Mutex::new(Vec::<HashMap<&str, &str>>::new()));
